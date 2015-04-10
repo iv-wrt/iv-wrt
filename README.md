@@ -1,2 +1,2 @@
 # iv-wrt
-An Intentionally Vulnerable Router Firmware Distribution
+An intentionally vulnerable router firmware distribution based on OpenWrt
