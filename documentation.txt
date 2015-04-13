@@ -1,0 +1,125 @@
+Authentication Bypass
+---------------------
+
+Vulnerability: Authentication bypass is turned off for the network disgnostics page
+
+Attack: visit http://<ip-address>/cgi-bin/luci/admin/network/diagnostics (without having first logged in)
+
+Exploit: You can find the exploit for this vulnerability at iv-wrt/exploits/auth_bypass.py. Note that python packages "BeautifulSoup," "requests" and "re" are dependencies.
+
+Vulnerable Code:
+
+	/usr/lib/lua/luci/controller/admin/network.lua:
+		page = node("admin", "network", "diagnostics")                                           
+		page.target = template("admin_network/diagnostics")
+		page.title  = _("Diagnostics")
+		page.order = 60
+		page.sysauth = false
+
+Backdoor
+--------
+
+Vulnerability: A backdoor user account with root priveleges has been added
+
+Attack: ssh ruser@<ip-address>
+	password is "rpassword" (without quotes)
+
+Exploit: You can find the exploit for this vulnerability at iv-wrt/exploits/backdoor. Note that "expect" is a dependency for this script.
+
+Vulnerable Code:
+	
+	/etc/passwd:
+		ruser:x:0:0:rservice_default:/tmp:/bin/ash
+
+	/etc/shadow:
+		ruser:$1$4Q5Z0BuW$9UI5yWhHR3.NWxjuDR2Cs/:16528:0:99999:7:::
+
+Command Injection
+-----------------
+
+Vulnerability: It is possible to inject ash commands into the ping field which exists on <ip-address>/admin/network/diagnostics
+
+Attack: <ip-address>/cgi-bin/luci/admin/network/diag_ping/;ls
+
+Exploit: You can find the exploit for this vulnerability at iv-wrt/exploits/cmd_injection.py. Note that python package "requests" is a dependency.
+
+Vulnerable Code:
+
+	/usr/lib/lua/luci/view/admin_network/diagnostics.htm: (Here you can see some original OpenWrt code that has been commented out to enable the vulnerability)
+		 function(x)                                                                          
+                 {                                                                                   
+                 //      if (x.responseText)                                                          
+                 //      {                                                                            
+				legend.style.display = 'none';                                       
+	                        output.innerHTML = String.format('<pre>%h</pre>', x.responseText);   
+                 //      }                                                                            
+                 //      else                                                                         
+                 //      {                                                                            
+                 //              legend.style.display = 'none';                                       
+                 //              output.innerHTML = '<span class="error"><%:Bad address specified!%></
+                 //      }
+
+	/usr/lib/lua/luci/controller/admin/network.lua:
+		function diag_command(cmd, addr)                                                                                
+		        if addr then                                               
+                		luci.http.prepare_content("text/plain")                                          
+                		local util = io.popen(cmd % addr) 
+		...
+
+		function diag_ping(addr)                                                                                                              
+        		diag_command("ping -c 5 -W 1 %s", addr)                                                                                                		       end 
+
+Reflected Cross-Site Scripting*
+------------------------------
+
+Vulnerability: On /cgi-bin/luci/;stok=<session-token>/admin/system/packages you can search for a package to determine whether or not it's installed. Your search string is shown above the results. It is possible to inject scripting into this field. 
+
+Attack: <ip-address>/cgi-bin/luci/;stok=<session-token>/admin/system/packages?query=<script>alert(1)</script>
+
+Vulnerable Code:
+
+	/usr/lib/lua/luci/view/admin_system/packages.htm:
+		<input type="hidden" name="display" value=<%=display%> />
+
+*Note that this attack will be blocked by Chrome's XSS auditor, the attack is known to work on firefox. Chrome automatically blocks the execution of scripts that it recognizes as existing within the url. Feel free to experiment with attempting to evade this filter.
+
+Stored Cross-Site Scripting
+---------------------------
+
+Vulnerability:  It is possible to inject scripting into the hostname of the router. Since the hostname appears in the title of every page in the administration interface, this results in stored XSS for all pages.
+
+Attack: Navigate to System --> System (located at /cgi-bin/luci/;stok=<session-token>/admin/system/system). In the Hostname field, enter "/><script>alert(1)</script>" (without quotes; the attack will still work if you include the quotes but you don't need them). 
+
+Vulnerable Code:
+
+	/usr/lib/lua/luci/cbi/datatypes.lua: (Here you can see more original OpenWrt code that has, again, been commented out to enable the 
+vulnerability)
+		--if val and (#val < 254) and (
+        	--   val:match("^[a-zA-Z_]+$") or
+        	--   (val:match("^[a-zA-Z0-9_][a-zA-Z0-9_%-%.]*[a-zA-Z0-9]$") and
+        	--    val:match("[^0-9%.]"))
+        	--) then
+                	return true
+        	--end
+        	--return false
+        	end		
+
+Cross Site Request Forgery
+--------------------------
+
+Vulnerability: While a user is logged in to the administration interface, a specially-crafted link from an outside source can cause actions to be executed on the administration interface. The system does not verify that the session token is correct. 
+
+Attack: First, check Status --> Processes. Look at the process id of /sbin/logd. We are going to kill this process. It may immediately restart. If it restarts with a new process id, we'll know we've successfully perpetrated the attack. Now visit <ip-addres>/cgi-bin/luci/;stok=<any-string>/admin/status/processes?process=/sbin/logd&Kill=True from a different tab or browser. Return to the administration interface and verify that the entry for /sbin/logd has either disappeared or has a new process id.
+
+Exploit: You can find the exploit for this vulnerability at iv-wrt/exploits/csrf.py. Note that python package "requests" is a dependency.
+
+Vulnerable Code:
+
+	/usr/lib/lua/luci/dispatcher.lua:
+		dispatch()
+		...
+			if sdat then
+                        	--if not verifytoken or ctx.urltoken.stok == sdat.token then
+                                	user = sdat.user
+                        	--end
+                	else
