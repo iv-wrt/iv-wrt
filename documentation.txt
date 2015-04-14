@@ -3,26 +3,13 @@ Starting the Image
 
 To start the image you will need qemu-system-mipsel and all of it's
 dependencies. We recommend that you create a TAP device called tap0 and bridge
-it to one of your network interfaces. Keep in mind that for the time being
-'br-lan' of the image will be initially-configured as 192.168.1.1. This will
-likely cause a collision with your default gateway and general pandemonium. If
-you're using your ethernet device to connect to the internet, you might want
-to bridge tap0 to your wireless card. If you're using your wireless card
-to connect to the internet, you might want to bridge tap0 to your ethernet card.
-If you have only one NIC you have little choice but to bridge tap0 to that
-NIC, in which case (assuming that your default gateway is already
-192.168.1.1), you will lose internet connectivity until you boot the image
-and change the ip address of br-lan.
-
-Once the image starts, you will want to change the router's LAN ip to
-something that is either (a) not the same as your default gateway's or (b) on
-a different subnet altogether (just make sure that your bridge is on that same
-subnet).
+it to your network interface. When the image boots, its LAN ip will be
+192.168.1.254
 
 The driver for e1000 network cards have been built into the image. The following
 command will tell qemu to start the image using the interface tap0 and the e1000:
 
-qemu-system-mipsel -kernel <image-name> -nographic -m 256 -net tap,ifname=tap0,script=no,downscript=no -net nic,model=e1000
+qemu-system-mipsel -kernel iv-wrt.elf -nographic -m 256 -net tap,ifname=tap0,script=no,downscript=no -net nic,model=e1000
 
 Authentication Bypass
 ---------------------
