@@ -4,7 +4,7 @@ Starting the Image
 To start the image you will need qemu-system-mipsel and all of its
 dependencies. We recommend that you create a TAP device called tap0 and bridge
 it to your network interface. When the image boots, its LAN ip will be
-192.168.1.254
+10.0.0.1.
 
 The driver for e1000 network cards have been built into the image. The following
 command will tell qemu to start the image using the interface tap0 and the e1000:
