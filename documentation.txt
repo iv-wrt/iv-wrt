@@ -1,7 +1,7 @@
 Starting the Image
 ------------------
 
-To start the image you will need qemu-system-mipsel and all of it's
+To start the image you will need qemu-system-mipsel and all of its
 dependencies. We recommend that you create a TAP device called tap0 and bridge
 it to your network interface. When the image boots, its LAN ip will be
 192.168.1.254
