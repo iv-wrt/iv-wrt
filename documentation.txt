@@ -122,7 +122,7 @@ Cross Site Request Forgery
 
 Vulnerability: While a user is logged in to the administration interface, a specially-crafted link from an outside source can cause actions to be executed on the administration interface. The system does not verify that the session token is correct. 
 
-Attack: First, check Status --> Processes. Look at the process id of /sbin/logd. We are going to kill this process. It may immediately restart. If it restarts with a new process id, we'll know we've successfully perpetrated the attack. Now visit <ip-addres>/cgi-bin/luci/;stok=<any-string>/admin/status/processes?process=/sbin/logd&Kill=True from a different tab or browser. Return to the administration interface and verify that the entry for /sbin/logd has either disappeared or has a new process id.
+Attack: First, check Status --> Processes. Look at the process id of /sbin/logd. We are going to kill this process. It may immediately restart. If it restarts with a new process id, we'll know we've successfully perpetrated the attack. Now visit <ip-addres>/cgi-bin/luci/;stok=<any-string>/admin/status/processes?cbid.table.<process-id>._term=Terminate&cbi.submit=1 from a different tab or browser. Return to the administration interface and verify that the entry for /sbin/logd has either disappeared or has a new process id.
 
 Exploit: You can find the exploit for this vulnerability at iv-wrt/exploits/csrf.py. Note that python package "requests" is a dependency.
 
