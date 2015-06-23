@@ -1,0 +1,39 @@
+# This is an example /etc/network/interfaces file that is known to work on ubuntu with iv-wrt
+#
+# Use it as a guideline to configure your network like so:
+#
+#	    LAN-|-tap0----br1----dummy0-|
+#    iv-wrt	|			|   client(s)
+#	    WAN-|-tap1----br2----dummy1-|
+#
+# iv-wrt is configured to use 172.30.254.1 with tap0 and 10.254.254.1 with tap1
+#	the 172.16.x.x-172.31.x.x range is a smaller address space which should help you remember that that's the LAN, as opposed to the "larger" 10.x.x.x network. 
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+  pre-up /sbin/modprobe dummy numdummies=2 #no good place to put this
+
+auto br0 
+iface br0 inet dhcp 
+  bridge_ports eth0
+  bridge_maxwait 0
+
+auto tap0
+  iface tap0 inet manual
+  pre-up /usr/sbin/tunctl -t tap0
+
+auto br1
+iface br1 inet static
+  address 172.30.254.2
+  netmask 255.255.255.0
+  bridge_ports tap0 dummy0
+
+auto tap1
+  iface tap1 inet manual
+  pre-up /usr/sbin/tunctl -t tap1
+
+auto br2
+  iface br2 inet static
+  address 10.254.254.2
+  netmask 255.255.255.0
+  bridge_ports tap1 dummy1

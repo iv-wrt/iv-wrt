@@ -1,0 +1,36 @@
+# This is an example /etc/conf.d/net that is known to work on gentoo with iv-wrt
+# Use it as a guideline to configure your network like so:
+#
+#	    LAN-|-tap0----br1----dummy0-|
+#    iv-wrt	|			|   client(s)
+#	    WAN-|-tap1----br2----dummy1-|
+#
+# iv-wrt is configured to use 172.30.254.1 with tap0 and 10.254.254.1 with tap1
+#
+#	the 172.16.x.x-172.31.x.x range is a smaller address space which should help you remember that that's the LAN,
+#	 as opposed to the "larger" 10.x.x.x network. 
+##
+## You should create symbolic links in /etc/init.d/ named after each of your taps, bridges and dummies with net.lo as a target, e.g.
+##	'cd /etc/init.d && ln -s net.lo net.tap0 && ln -s net.lo net.tap1 && ln -s net.lo net.br0' etc. 
+## You will have to bring the dummy interfaces up on your own with 
+##	'sudo modprobe dummy numdummies=2' 
+## Then you should be able to do
+##	'sudo /etc/init.d/net.br0 start && sudo /etc/init.d/net.br1 start" to bring up everything you need
+
+tuntap_tap0="tap"
+config_tap0=null
+
+tuntap_tap1="tap"
+config_tap1=null
+
+#first bridge
+config_br0="manual"
+config_br0="172.30.254.2/24"
+bridge_br0="dummy0 tap0"
+rc_net_br0_need="net.dummy0 net.tap0"
+
+#second bridge
+config_br1="manual"
+config_br1="10.254.254.2/24"
+bridge_br1="dummy1 tap1"
+bridge_br1_need="net.dummy1 net.tap1"
