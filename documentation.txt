@@ -1,15 +1,9 @@
 Starting the Image
 ------------------
 
-To start the image you will need qemu-system-mipsel and all of its
-dependencies. We recommend that you create a TAP device called tap0 and bridge
-it to your network interface. When the image boots, its LAN ip will be
-10.0.0.1.
-
-The driver for e1000 network cards have been built into the image. The following
-command will tell qemu to start the image using the interface tap0 and the e1000:
-
-qemu-system-mipsel -kernel iv-wrt.elf -nographic -m 256 -net tap,ifname=tap0,script=no,downscript=no -net nic,model=e1000
+You can start the image with the shell script 'iv-wrt.sh.' This script assumes
+that you have interfaces tap0 and tap1. Look in the 'config' directory to see
+how you should set your networking up.
 
 Authentication Bypass
 ---------------------
