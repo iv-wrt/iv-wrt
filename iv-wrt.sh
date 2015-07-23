@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#if no image file is passed, choose iv-wrt.elf
+#if no image file is passed, choose image.elf
 if [ "$#" = 0 ]; then
         image='image.elf'
 else
