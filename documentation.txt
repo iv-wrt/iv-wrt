@@ -1,9 +1,9 @@
 Starting the Image
 ------------------
 
-You can start the image with the shell script 'iv-wrt.sh.' This script assumes
-that you have interfaces tap0 and tap1. Look in the 'config' directory to see
-how you should set your networking up.
+You can start the webserver with 'sudo ./server.py' and then click the link
+that says "start iv-wrt" This script assumes that you have interfaces tap0
+and tap1. Look in the 'config' directory to see how you should set your networking up.
 
 Authentication Bypass
 ---------------------
