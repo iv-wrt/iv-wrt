@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from subprocess import call
+import requests
 
 def call_optless_command(command):
 	result = ''
@@ -50,3 +51,19 @@ def module_exists(module):
         return False
     else:
         return True
+
+def get_status_and_url(page, ip):
+    URL = 'http://'+ip
+    session = requests.session()
+    if page is not None and page[:7] != 'http://':
+        print(URL+page)
+        r = session.get(URL+page)
+        result = str(r.text)
+        #result = str(r.status_code)+": "+URL+page
+        return result
+
+
+#
+#
+#
+#

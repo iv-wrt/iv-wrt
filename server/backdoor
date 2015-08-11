@@ -4,7 +4,7 @@ set ip [lindex $argv 0]
 if { $ip == ""} {
 	puts " backdoor <ip-address>";
 } else {
-	spawn ssh ruser@$ip
+	spawn ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ruser@$ip
 	expect "assword:"
 	send "rpassword\r"
 	interact
